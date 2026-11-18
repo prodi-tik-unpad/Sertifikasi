@@ -11,17 +11,17 @@
 
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Google Fonts: Cinzel, Playfair Display & Plus Jakarta Sans -->
+  <!-- Google Fonts: Cinzel, Playfair Display, Cormorant Garamond, Montserrat & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Montserrat:wght@600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" crossorigin="anonymous" />
 
-  <!-- Library Ekspor Native Browser (html-to-image), Fallback (html2canvas), PDF (jsPDF) & QR Code (QRious) -->
+  <!-- Library Ekspor Native Browser (html-to-image), Fallback (html2canvas), PDF (jsPDF), QR Code (QRious) & Excel Parser (SheetJS) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
   <style>
     :root {
@@ -47,6 +47,14 @@
 
     .font-jakarta {
       font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .font-cormorant {
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    .font-montserrat {
+      font-family: 'Montserrat', sans-serif;
     }
 
     /* Kanvas Eksak A4 Landscape (297mm x 210mm @ 96 DPI = 1123px x 794px) */
@@ -301,19 +309,23 @@
     <!-- LEFT CONTROL PANEL -->
     <aside id="control-sidebar" class="no-print w-full lg:w-[465px] xl:w-[500px] bg-slate-50 border-b lg:border-b-0 lg:border-r border-slate-200 flex-shrink-0 flex flex-col lg:h-[calc(100vh-61px)]">
 
-      <!-- 3-Tab Navigation -->
-      <nav class="grid grid-cols-3 gap-1.5 p-2.5 bg-white border-b border-slate-200 shrink-0">
+      <!-- 4-Tab Navigation -->
+      <nav class="grid grid-cols-4 gap-1 p-2 bg-white border-b border-slate-200 shrink-0">
         <button type="button" data-tab="tab-content-batch"
-          class="sidebar-tab-btn py-2 px-2 rounded-xl text-xs font-bold bg-[#0F2942] text-white shadow-xs transition cursor-pointer flex items-center justify-center gap-1.5">
-          <span>1. Konten &amp; Massal</span>
+          class="sidebar-tab-btn py-2 px-1.5 rounded-xl text-[11px] font-bold bg-[#0F2942] text-white shadow-2xs transition cursor-pointer flex items-center justify-center gap-1">
+          <span>1. Konten</span>
+        </button>
+        <button type="button" data-tab="tab-design"
+          class="sidebar-tab-btn py-2 px-1.5 rounded-xl text-[11px] font-semibold text-slate-600 hover:text-[#0F2942] hover:bg-slate-100 transition cursor-pointer flex items-center justify-center gap-1">
+          <span>2. Desain</span>
         </button>
         <button type="button" data-tab="tab-logo-lang-ttd"
-          class="sidebar-tab-btn py-2 px-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-[#0F2942] hover:bg-slate-100 transition cursor-pointer flex items-center justify-center gap-1.5">
-          <span>2. Logo, Bahasa &amp; TTD</span>
+          class="sidebar-tab-btn py-2 px-1.5 rounded-xl text-[11px] font-semibold text-slate-600 hover:text-[#0F2942] hover:bg-slate-100 transition cursor-pointer flex items-center justify-center gap-1">
+          <span>3. Logo &amp; TTD</span>
         </button>
         <button type="button" data-tab="tab-archive"
-          class="sidebar-tab-btn py-2 px-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-[#0F2942] hover:bg-slate-100 transition cursor-pointer flex items-center justify-center gap-1.5">
-          <span>3. Arsip &amp; Drive</span>
+          class="sidebar-tab-btn py-2 px-1.5 rounded-xl text-[11px] font-semibold text-slate-600 hover:text-[#0F2942] hover:bg-slate-100 transition cursor-pointer flex items-center justify-center gap-1">
+          <span>4. Arsip</span>
           <span id="archive-count-badge" class="px-1.5 py-0.2 rounded-full bg-[#C59B27] text-[#0F2942] text-[10px] font-extrabold">0</span>
         </button>
       </nav>
@@ -376,13 +388,53 @@
 
             <!-- PANEL MODE CETAK MASSAL (BATCH) -->
             <div id="batch-recipient-panel" class="hidden space-y-3.5 pt-1">
+              <!-- Impor File Excel / CSV -->
+              <div class="p-3 rounded-xl bg-teal-50/70 border border-teal-200/90 space-y-2.5">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                  <div class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-[#0D7377] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span class="text-xs font-bold text-[#0F2942]">Impor Daftar Nama dari Excel / CSV</span>
+                  </div>
+                  <button id="btn-download-batch-template" type="button"
+                    class="px-2 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-[#0F2942] text-[10px] font-bold transition cursor-pointer">
+                    Unduh Template (.xlsx)
+                  </button>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                  <label class="flex-1 min-w-[160px] py-2 px-3 rounded-xl bg-[#0D7377] hover:bg-[#10898e] text-white text-xs font-bold shadow-2xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 4v12m0-12l-4 4m4-4l4 4" />
+                    </svg>
+                    <span>Pilih File Excel (.xlsx / .csv)</span>
+                    <input id="inp-import-excel" type="file" accept=".xlsx,.xls,.csv,.tsv,.txt" class="hidden" />
+                  </label>
+
+                  <select id="sel-excel-import-mode" title="Mode pengisian daftar nama"
+                    class="px-2.5 py-2 rounded-xl bg-white border border-slate-300 text-[11px] font-semibold text-[#0F2942] outline-none cursor-pointer">
+                    <option value="replace">Ganti Daftar</option>
+                    <option value="append">Tambahkan</option>
+                  </select>
+                </div>
+
+                <div class="flex items-center justify-between gap-2 text-[11px] text-slate-600">
+                  <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input id="chk-excel-has-header" type="checkbox" checked class="w-3.5 h-3.5 rounded accent-[#0D7377]" />
+                    <span>Abaikan baris pertama (Header kolom)</span>
+                  </label>
+                  <span id="excel-import-status" class="text-[10px] font-mono text-[#0D7377] font-bold truncate max-w-[140px]"></span>
+                </div>
+              </div>
+
               <!-- Input Daftar Nama -->
               <div>
                 <div class="flex items-center justify-between mb-1">
                   <label for="inp-batch-names" class="text-xs font-bold text-[#0F2942]">Daftar Nama Penerima (1 Nama per Baris)</label>
                   <span id="batch-count-badge" class="px-2 py-0.5 rounded-full bg-[#0D7377]/10 text-[#0D7377] font-mono text-[11px] font-bold">5 penerima</span>
                 </div>
-                <textarea id="inp-batch-names" rows="5" placeholder="Masukkan daftar nama penerima (1 nama per baris)..."
+                <textarea id="inp-batch-names" rows="5" placeholder="Masukkan daftar nama penerima (1 nama per baris) atau impor dari Excel/CSV..."
                   class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-300 focus:border-[#0D7377] focus:bg-white text-xs font-medium text-[#0F2942] outline-none transition leading-relaxed">Prof. Dr. Ir. Hendra Wijaya, S.T., M.T., IPM.
 Dr. Eng. Ratna Kusumawardani, S.T., M.Sc.
 Dr. Ir. Bambang Setiawan, M.T., IPU.
@@ -566,7 +618,198 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
         </div>
 
         <!-- ========================================================= -->
-        <!-- TAB 2: LOGO HEADER, BAHASA, TTD KAPRODI & QR VERIFIKASI   -->
+        <!-- TAB 2: DESAIN SERTIFIKAT (TEMA, BINGKAI, WATERMARK & FONT) -->
+        <!-- ========================================================= -->
+        <div id="tab-design" class="tab-panel hidden space-y-5">
+
+          <!-- Preset Tema Warna Sertifikat -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-3.5 shadow-2xs space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="w-1.5 h-4 rounded-full bg-[#C59B27]"></span>
+                <h2 class="text-xs font-bold uppercase tracking-wider text-[#0F2942]">Preset Tema Warna Sertifikat</h2>
+              </div>
+              <button id="btn-reset-design" type="button"
+                class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold transition cursor-pointer">
+                Reset Default
+              </button>
+            </div>
+
+            <div id="design-preset-grid" class="grid grid-cols-2 gap-2">
+              <button type="button" data-theme-preset="unpadClassic"
+                class="design-preset-btn p-2.5 rounded-xl border-2 border-[#0D7377] bg-teal-50/40 text-left transition cursor-pointer">
+                <div class="flex items-center gap-1.5 mb-1.5">
+                  <span class="w-4 h-4 rounded-full border border-slate-300" style="background:#FDFCF8;"></span>
+                  <span class="w-4 h-4 rounded-full" style="background:#0F2537;"></span>
+                  <span class="w-4 h-4 rounded-full" style="background:#0D7377;"></span>
+                  <span class="w-4 h-4 rounded-full" style="background:#C59B27;"></span>
+                </div>
+                <div class="text-[11px] font-extrabold text-[#0F2942]">Klasik Unpad Navy</div>
+                <div class="text-[10px] text-slate-500">Ivory, Navy, Teal &amp; Gold</div>
+              </button>
+
+              <button type="button" data-theme-preset="emeraldVokasi"
+                class="design-preset-btn p-2.5 rounded-xl border border-slate-200 bg-white hover:border-[#0D7377] text-left transition cursor-pointer">
+                <div class="flex items-center gap-1.5 mb-1.5">
+                  <span class="w-4 h-4 rounded-full border border-slate-300" style="background:#FAFDFB;"></span>
+                  <span class="w-4 h-4 rounded-full" style="background:#064E3B;"></span>
+                  <span class="w-4 h-4 rounded-full" style="background:#0F766E;"></span>
+                  <span class="w-4 h-4 rounded-full" style="background:#C59B27;"></span>
+                </div>
+                <div class="text-[11px] font-extrabold text-[#0F2942]">Zamrud Vokasi</div>
+                <div class="text-[10px] text-slate-500">Emerald Hijau &amp; Emas</div>
+              </button>
+
+              <button type="button" data-theme-preset="royalMaroon"
+                class="design-preset-btn p-2.5 rounded-xl border border-slate-200 bg-white hover:border-[#0D7377] text-left transition cursor-pointer">
+                <div class="flex items-center gap-1.5 mb-1.5">
+                  <span class="w-4 h-4 rounded-full border border-slate-300" style="background:#FDFBF9;"></span>
+                  <span class="w-4 h-4 rounded-full" style="background:#4C0519;"></span>
+                  <span class="w-4 h-4 rounded-full" style="background:#9F1239;"></span>
+                  <span class="w-4 h-4 rounded-full" style="background:#B48A28;"></span>
+                </div>
+                <div class="text-[11px] font-extrabold text-[#0F2942]">Royal Maroon</div>
+                <div class="text-[10px] text-slate-500">Maroon &amp; Champagne Gold</div>
+              </button>
+
+              <button type="button" data-theme-preset="processCyan"
+                class="design-preset-btn p-2.5 rounded-xl border border-slate-200 bg-white hover:border-[#0D7377] text-left transition cursor-pointer">
+                <div class="flex items-center gap-1.5 mb-1.5">
+                  <span class="w-4 h-4 rounded-full border border-slate-300" style="background:#F8FAFC;"></span>
+                  <span class="w-4 h-4 rounded-full" style="background:#0F172A;"></span>
+                  <span class="w-4 h-4 rounded-full" style="background:#0284C7;"></span>
+                  <span class="w-4 h-4 rounded-full" style="background:#D97706;"></span>
+                </div>
+                <div class="text-[11px] font-extrabold text-[#0F2942]">Process Cyan</div>
+                <div class="text-[10px] text-slate-500">Slate, Biru Kimia &amp; Amber</div>
+              </button>
+
+              <button type="button" data-theme-preset="cleanPlatinum"
+                class="design-preset-btn p-2.5 rounded-xl border border-slate-200 bg-white hover:border-[#0D7377] text-left transition cursor-pointer">
+                <div class="flex items-center gap-1.5 mb-1.5">
+                  <span class="w-4 h-4 rounded-full border border-slate-300" style="background:#FFFFFF;"></span>
+                  <span class="w-4 h-4 rounded-full" style="background:#1E293B;"></span>
+                  <span class="w-4 h-4 rounded-full" style="background:#0D7377;"></span>
+                  <span class="w-4 h-4 rounded-full" style="background:#94A3B8;"></span>
+                </div>
+                <div class="text-[11px] font-extrabold text-[#0F2942]">Minimalis Platinum</div>
+                <div class="text-[10px] text-slate-500">Putih Bersih &amp; Perak</div>
+              </button>
+
+              <button type="button" data-theme-preset="darkExecutive"
+                class="design-preset-btn p-2.5 rounded-xl border border-slate-200 bg-white hover:border-[#0D7377] text-left transition cursor-pointer">
+                <div class="flex items-center gap-1.5 mb-1.5">
+                  <span class="w-4 h-4 rounded-full border border-slate-400" style="background:#0B192C;"></span>
+                  <span class="w-4 h-4 rounded-full border border-slate-300" style="background:#F8FAFC;"></span>
+                  <span class="w-4 h-4 rounded-full" style="background:#2DD4BF;"></span>
+                  <span class="w-4 h-4 rounded-full" style="background:#E5B94C;"></span>
+                </div>
+                <div class="text-[11px] font-extrabold text-[#0F2942]">Dark Executive</div>
+                <div class="text-[10px] text-slate-500">Obsidian Gelap &amp; Emas</div>
+              </button>
+            </div>
+
+            <!-- Kustomisasi Warna Manual -->
+            <div class="pt-2 border-t border-slate-100">
+              <div class="text-[11px] font-bold text-slate-700 mb-2">Kustomisasi Warna Manual</div>
+              <div class="grid grid-cols-2 gap-2.5">
+                <label class="flex items-center justify-between px-2.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-[11px] font-semibold text-slate-700 cursor-pointer">
+                  <span>Latar Kertas</span>
+                  <input id="inp-color-paper" type="color" value="#FDFCF8" class="w-7 h-6 rounded border-0 bg-transparent cursor-pointer" />
+                </label>
+                <label class="flex items-center justify-between px-2.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-[11px] font-semibold text-slate-700 cursor-pointer">
+                  <span>Bingkai &amp; Judul</span>
+                  <input id="inp-color-primary" type="color" value="#0F2537" class="w-7 h-6 rounded border-0 bg-transparent cursor-pointer" />
+                </label>
+                <label class="flex items-center justify-between px-2.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-[11px] font-semibold text-slate-700 cursor-pointer">
+                  <span>Aksen &amp; Topik</span>
+                  <input id="inp-color-accent" type="color" value="#0D7377" class="w-7 h-6 rounded border-0 bg-transparent cursor-pointer" />
+                </label>
+                <label class="flex items-center justify-between px-2.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-[11px] font-semibold text-slate-700 cursor-pointer">
+                  <span>Garis Ornamen</span>
+                  <input id="inp-color-gold" type="color" value="#C59B27" class="w-7 h-6 rounded border-0 bg-transparent cursor-pointer" />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gaya Bingkai & Ornamen Sudut -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-3.5 shadow-2xs space-y-3">
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-4 rounded-full bg-[#0D7377]"></span>
+              <h2 class="text-xs font-bold uppercase tracking-wider text-[#0F2942]">Gaya Bingkai &amp; Ornamen Sudut</h2>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" data-frame-style="classic"
+                class="frame-style-btn p-2.5 rounded-xl border-2 border-[#0D7377] bg-teal-50/40 text-left transition cursor-pointer">
+                <div class="text-xs font-bold text-[#0F2942]">1. Klasik Akademik</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Bingkai ganda &amp; siku geometris</div>
+              </button>
+
+              <button type="button" data-frame-style="modern"
+                class="frame-style-btn p-2.5 rounded-xl border border-slate-200 bg-white hover:border-[#0D7377] text-left transition cursor-pointer">
+                <div class="text-xs font-bold text-[#0F2942]">2. Modern Minimalis</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Sudut melengkung halus &amp; bersih</div>
+              </button>
+
+              <button type="button" data-frame-style="ornate"
+                class="frame-style-btn p-2.5 rounded-xl border border-slate-200 bg-white hover:border-[#0D7377] text-left transition cursor-pointer">
+                <div class="text-xs font-bold text-[#0F2942]">3. Berlian Akademik</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Ornamen berlian sudut &amp; bingkai</div>
+              </button>
+
+              <button type="button" data-frame-style="executive"
+                class="frame-style-btn p-2.5 rounded-xl border border-slate-200 bg-white hover:border-[#0D7377] text-left transition cursor-pointer">
+                <div class="text-xs font-bold text-[#0F2942]">4. Pita Samping</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Pita vertikal kiri-kanan &amp; garis emas</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Pola Watermark Kimia & Tipografi -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-3.5 shadow-2xs space-y-3">
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-4 rounded-full bg-[#C59B27]"></span>
+              <h2 class="text-xs font-bold uppercase tracking-wider text-[#0F2942]">Watermark Latar &amp; Tipografi</h2>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="sel-watermark-pattern" class="block text-xs font-semibold text-slate-700 mb-1">Pola Watermark Kimia</label>
+                <select id="sel-watermark-pattern"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 focus:border-[#0D7377] text-xs font-semibold text-[#0F2942] outline-none cursor-pointer">
+                  <option value="benzene">Struktur Molekul Benzena</option>
+                  <option value="hexgrid">Jaring Heksagonal Reaktor</option>
+                  <option value="orbit">Orbital Atom &amp; Ikatan</option>
+                  <option value="none">Polos (Tanpa Watermark)</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="sel-font-pairing" class="block text-xs font-semibold text-slate-700 mb-1">Kombinasi Tipografi</label>
+                <select id="sel-font-pairing"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 focus:border-[#0D7377] text-xs font-semibold text-[#0F2942] outline-none cursor-pointer">
+                  <option value="classic">Klasik (Cinzel &amp; Playfair)</option>
+                  <option value="royal">Editorial (Cormorant Garamond)</option>
+                  <option value="modern">Modern (Montserrat &amp; Jakarta)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-200">
+              <div class="flex justify-between text-xs text-slate-700 mb-1">
+                <span class="font-semibold">Transparansi Watermark</span>
+                <span id="val-watermark-opacity" class="font-mono font-bold text-[#0D7377]">5%</span>
+              </div>
+              <input id="inp-watermark-opacity" type="range" min="0" max="15" step="1" value="5" class="w-full cursor-pointer" />
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- TAB 3: LOGO HEADER, BAHASA, TTD KAPRODI & QR VERIFIKASI   -->
         <!-- ========================================================= -->
         <div id="tab-logo-lang-ttd" class="tab-panel hidden space-y-5">
 
@@ -1052,23 +1295,20 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
             <!-- ========================================================================= -->
             <div id="certificate-canvas" class="certificate-paper">
 
-              <!-- LAYER 1: SATU SVG FULL-BLEED (1123 x 794) UNTUK LATAR KREM, BINGKAI, KEEMPAT SUDUT, AKSEN TEAL & MOLEKUL BENZENA -->
-              <svg width="1123" height="794" viewBox="0 0 1123 794" fill="none" xmlns="http://www.w3.org/2000/svg"
+              <!-- LAYER 1: SATU SVG FULL-BLEED (1123 x 794) UNTUK LATAR, BINGKAI DINAMIS, SUDUT & WATERMARK KIMIA -->
+              <svg id="cert-bg-svg" width="1123" height="794" viewBox="0 0 1123 794" fill="none" xmlns="http://www.w3.org/2000/svg"
                 style="position: absolute; top: 0; left: 0; width: 1123px; height: 794px; pointer-events: none; z-index: 1;">
-                <!-- Latar Kertas Krem Gading (#FDFCF8) -->
-                <rect x="0" y="0" width="1123" height="794" fill="#FDFCF8" />
+                <!-- Latar Kertas Dinamis -->
+                <rect id="cert-svg-paper-bg" x="0" y="0" width="1123" height="794" fill="#FDFCF8" />
 
-                <!-- Watermark Struktur Molekul Benzena Tipis di Sudut & Tengah -->
-                <g opacity="0.045" stroke="#0D7377" stroke-width="2">
-                  <!-- Sudut Kiri Atas -->
+                <!-- WATERMARK 1: STRUKTUR MOLEKUL BENZENA -->
+                <g id="cert-watermark-benzene" opacity="0.05" stroke="#0D7377" stroke-width="2">
                   <polygon points="118,86 150,104.5 150,141.5 118,160 86,141.5 86,104.5" />
                   <circle cx="118" cy="123" r="19" />
                   <polygon points="182,123 214,141.5 214,178.5 182,197 150,178.5 150,141.5" />
-                  <!-- Sudut Kanan Atas -->
                   <polygon points="1005,86 1037,104.5 1037,141.5 1005,160 973,141.5 973,104.5" />
                   <circle cx="1005" cy="123" r="19" />
                   <polygon points="941,123 973,141.5 973,178.5 941,197 909,178.5 909,141.5" />
-                  <!-- Cincin Benzena Tengah -->
                   <polygon points="561.5,432 618,464.5 618,529.5 561.5,562 505,529.5 505,464.5" />
                   <circle cx="561.5" cy="497" r="34" />
                   <polygon points="448.5,497 505,529.5 505,594.5 448.5,627 392,594.5 392,529.5" />
@@ -1077,38 +1317,86 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
                   <circle cx="674.5" cy="562" r="32" />
                 </g>
 
-                <!-- Bingkai Luar Academic Navy (#0F2537) -->
-                <rect x="22" y="22" width="1079" height="750" stroke="#0F2537" stroke-width="3.5" />
+                <!-- WATERMARK 2: JARING HEKSAGONAL REAKTOR -->
+                <g id="cert-watermark-hexgrid" class="hidden" opacity="0.05" stroke="#0D7377" stroke-width="1.8">
+                  <polygon points="140,120 185,94 230,120 230,172 185,198 140,172" />
+                  <polygon points="230,120 275,94 320,120 320,172 275,198 230,172" />
+                  <polygon points="185,198 230,172 275,198 275,250 230,276 185,250" />
+                  <polygon points="803,520 848,494 893,520 893,572 848,598 803,572" />
+                  <polygon points="893,520 938,494 983,520 983,572 938,598 893,572" />
+                  <polygon points="848,598 893,572 938,598 938,650 893,676 848,650" />
+                  <circle cx="561.5" cy="397" r="145" stroke-dasharray="6 6" />
+                  <circle cx="561.5" cy="397" r="195" stroke-dasharray="3 7" />
+                </g>
 
-                <!-- Garis Bingkai Tengah Emas Tipis (#C59B27) -->
-                <rect x="29" y="29" width="1065" height="736" stroke="#C59B27" stroke-opacity="0.55" stroke-width="1" />
+                <!-- WATERMARK 3: ORBITAL ATOM & IKATAN -->
+                <g id="cert-watermark-orbit" class="hidden" opacity="0.05" stroke="#0D7377" stroke-width="1.8">
+                  <ellipse cx="561.5" cy="440" rx="190" ry="62" transform="rotate(-24 561.5 440)" />
+                  <ellipse cx="561.5" cy="440" rx="190" ry="62" transform="rotate(24 561.5 440)" />
+                  <ellipse cx="561.5" cy="440" rx="62" ry="190" />
+                  <circle cx="561.5" cy="440" r="18" fill="#0D7377" />
+                </g>
 
-                <!-- Bingkai Dalam Metallic Gold (#C59B27) -->
-                <rect x="34" y="34" width="1055" height="726" stroke="#C59B27" stroke-width="2" />
+                <!-- GAYA BINGKAI 1: KLASIK AKADEMIK (DEFAULT) -->
+                <g id="cert-frame-classic">
+                  <rect class="svg-primary-stroke" x="22" y="22" width="1079" height="750" stroke="#0F2537" stroke-width="3.5" />
+                  <rect class="svg-gold-stroke" x="29" y="29" width="1065" height="736" stroke="#C59B27" stroke-opacity="0.55" stroke-width="1" />
+                  <rect class="svg-gold-stroke" x="34" y="34" width="1055" height="726" stroke="#C59B27" stroke-width="2" />
 
-                <!-- Ornamen Sudut 1: Kiri Atas (22, 22) -->
-                <path d="M 22 22 H 92 V 32 H 32 V 92 H 22 Z" fill="#0F2537" />
-                <path d="M 38 38 H 76 V 41.5 H 41.5 V 76 H 38 Z" fill="#C59B27" />
-                <circle cx="49" cy="49" r="3.2" fill="#0D7377" />
+                  <path class="svg-primary-fill" d="M 22 22 H 92 V 32 H 32 V 92 H 22 Z" fill="#0F2537" />
+                  <path class="svg-gold-fill" d="M 38 38 H 76 V 41.5 H 41.5 V 76 H 38 Z" fill="#C59B27" />
+                  <circle class="svg-accent-fill" cx="49" cy="49" r="3.2" fill="#0D7377" />
 
-                <!-- Ornamen Sudut 2: Kanan Atas (1101, 22) -->
-                <path d="M 1101 22 H 1031 V 32 H 1091 V 92 H 1101 Z" fill="#0F2537" />
-                <path d="M 1085 38 H 1047 V 41.5 H 1081.5 V 76 H 1085 Z" fill="#C59B27" />
-                <circle cx="1074" cy="49" r="3.2" fill="#0D7377" />
+                  <path class="svg-primary-fill" d="M 1101 22 H 1031 V 32 H 1091 V 92 H 1101 Z" fill="#0F2537" />
+                  <path class="svg-gold-fill" d="M 1085 38 H 1047 V 41.5 H 1081.5 V 76 H 1085 Z" fill="#C59B27" />
+                  <circle class="svg-accent-fill" cx="1074" cy="49" r="3.2" fill="#0D7377" />
 
-                <!-- Ornamen Sudut 3: Kiri Bawah (22, 772) -->
-                <path d="M 22 772 H 92 V 762 H 32 V 702 H 22 Z" fill="#0F2537" />
-                <path d="M 38 756 H 76 V 752.5 H 41.5 V 718 H 38 Z" fill="#C59B27" />
-                <circle cx="49" cy="745" r="3.2" fill="#0D7377" />
+                  <path class="svg-primary-fill" d="M 22 772 H 92 V 762 H 32 V 702 H 22 Z" fill="#0F2537" />
+                  <path class="svg-gold-fill" d="M 38 756 H 76 V 752.5 H 41.5 V 718 H 38 Z" fill="#C59B27" />
+                  <circle class="svg-accent-fill" cx="49" cy="745" r="3.2" fill="#0D7377" />
 
-                <!-- Ornamen Sudut 4: Kanan Bawah (1101, 772) -->
-                <path d="M 1101 772 H 1031 V 762 H 1091 V 702 H 1101 Z" fill="#0F2537" />
-                <path d="M 1085 756 H 1047 V 752.5 H 1081.5 V 718 H 1085 Z" fill="#C59B27" />
-                <circle cx="1074" cy="745" r="3.2" fill="#0D7377" />
+                  <path class="svg-primary-fill" d="M 1101 772 H 1031 V 762 H 1091 V 702 H 1101 Z" fill="#0F2537" />
+                  <path class="svg-gold-fill" d="M 1085 756 H 1047 V 752.5 H 1081.5 V 718 H 1085 Z" fill="#C59B27" />
+                  <circle class="svg-accent-fill" cx="1074" cy="745" r="3.2" fill="#0D7377" />
 
-                <!-- Aksen Garis Vertikal Teal (#0D7377) Sisi Kiri & Kanan -->
-                <rect x="20" y="322" width="5" height="150" rx="2" fill="#0D7377" />
-                <rect x="1098" y="322" width="5" height="150" rx="2" fill="#0D7377" />
+                  <rect class="svg-accent-fill" x="20" y="322" width="5" height="150" rx="2" fill="#0D7377" />
+                  <rect class="svg-accent-fill" x="1098" y="322" width="5" height="150" rx="2" fill="#0D7377" />
+                </g>
+
+                <!-- GAYA BINGKAI 2: MODERN MINIMALIS -->
+                <g id="cert-frame-modern" class="hidden">
+                  <rect class="svg-primary-stroke" x="24" y="24" width="1075" height="746" rx="22" stroke="#0F2537" stroke-width="2.5" />
+                  <rect class="svg-gold-stroke" x="34" y="34" width="1055" height="726" rx="16" stroke="#C59B27" stroke-width="1.5" />
+                  <rect class="svg-accent-fill" x="360" y="22" width="403" height="5" rx="2.5" fill="#0D7377" />
+                  <rect class="svg-accent-fill" x="360" y="767" width="403" height="5" rx="2.5" fill="#0D7377" />
+                </g>
+
+                <!-- GAYA BINGKAI 3: BERLIAN AKADEMIK -->
+                <g id="cert-frame-ornate" class="hidden">
+                  <rect class="svg-primary-stroke" x="20" y="20" width="1083" height="754" stroke="#0F2537" stroke-width="4" />
+                  <rect class="svg-gold-stroke" x="30" y="30" width="1063" height="734" stroke="#C59B27" stroke-width="2.2" />
+                  <rect class="svg-accent-stroke" x="37" y="37" width="1049" height="720" stroke="#0D7377" stroke-width="1" stroke-dasharray="6 4" />
+                  <!-- Ornamen Berlian 4 Sudut -->
+                  <polygon class="svg-gold-fill" points="42,26 58,42 42,58 26,42" fill="#C59B27" />
+                  <circle class="svg-primary-fill" cx="42" cy="42" r="5" fill="#0F2537" />
+                  <polygon class="svg-gold-fill" points="1081,26 1097,42 1081,58 1065,42" fill="#C59B27" />
+                  <circle class="svg-primary-fill" cx="1081" cy="42" r="5" fill="#0F2537" />
+                  <polygon class="svg-gold-fill" points="42,736 58,752 42,768 26,752" fill="#C59B27" />
+                  <circle class="svg-primary-fill" cx="42" cy="752" r="5" fill="#0F2537" />
+                  <polygon class="svg-gold-fill" points="1081,736 1097,752 1081,768 1065,752" fill="#C59B27" />
+                  <circle class="svg-primary-fill" cx="1081" cy="752" r="5" fill="#0F2537" />
+                </g>
+
+                <!-- GAYA BINGKAI 4: PITA SAMPING EKSEKUTIF -->
+                <g id="cert-frame-executive" class="hidden">
+                  <rect class="svg-primary-fill" x="0" y="0" width="24" height="794" fill="#0F2537" />
+                  <rect class="svg-gold-fill" x="24" y="0" width="6" height="794" fill="#C59B27" />
+                  <rect class="svg-primary-fill" x="1099" y="0" width="24" height="794" fill="#0F2537" />
+                  <rect class="svg-gold-fill" x="1093" y="0" width="6" height="794" fill="#C59B27" />
+                  <rect class="svg-gold-stroke" x="42" y="24" width="1039" height="746" stroke="#C59B27" stroke-width="1.5" />
+                  <rect class="svg-accent-fill" x="42" y="24" width="1039" height="4" fill="#0D7377" />
+                  <rect class="svg-accent-fill" x="42" y="766" width="1039" height="4" fill="#0D7377" />
+                </g>
               </svg>
 
               <!-- LAYER 2: KONTEN UTAMA SERTIFIKAT (Z-INDEX 10) -->
@@ -1135,14 +1423,14 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
                 <section style="width: 100%; display: flex; flex-direction: column; align-items: center;">
                   <div style="height: 44px; display: flex; align-items: center; justify-content: center; gap: 20px; margin: 0 auto;">
                     <svg width="74" height="4" viewBox="0 0 74 4" style="display: block; flex-shrink: 0;">
-                      <rect x="0" y="1" width="74" height="2" rx="1" fill="#C59B27" />
+                      <rect class="svg-gold-fill" x="0" y="1" width="74" height="2" rx="1" fill="#C59B27" />
                     </svg>
                     <h1 id="cert-main-title" class="font-cinzel"
                       style="font-size: 38px; font-weight: 700; letter-spacing: 0.08em; color: #0F2942; line-height: 1.15; margin: 0; white-space: nowrap;">
                       SERTIFIKAT
                     </h1>
                     <svg width="74" height="4" viewBox="0 0 74 4" style="display: block; flex-shrink: 0;">
-                      <rect x="0" y="1" width="74" height="2" rx="1" fill="#C59B27" />
+                      <rect class="svg-gold-fill" x="0" y="1" width="74" height="2" rx="1" fill="#C59B27" />
                     </svg>
                   </div>
 
@@ -1178,9 +1466,9 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
 
                   <!-- Garis Aksen Emas SVG Berlapis Warna Solid -->
                   <svg id="svg-name-divider" width="660" height="3" viewBox="0 0 660 3" style="display: block; margin-top: 10px; flex-shrink: 0;" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="0" y="1" width="660" height="1" rx="0.5" fill="#C59B27" fill-opacity="0.35" />
-                    <rect x="85" y="0.5" width="490" height="2" rx="1" fill="#C59B27" />
-                    <rect x="210" y="0" width="240" height="3" rx="1.5" fill="#E6C567" />
+                    <rect class="svg-gold-fill" x="0" y="1" width="660" height="1" rx="0.5" fill="#C59B27" fill-opacity="0.35" />
+                    <rect class="svg-gold-fill" x="85" y="0.5" width="490" height="2" rx="1" fill="#C59B27" />
+                    <rect class="svg-gold-fill" x="210" y="0" width="240" height="3" rx="1.5" fill="#E6C567" />
                   </svg>
                 </section>
 
@@ -1272,9 +1560,9 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
 
                     <!-- Garis Aksen Emas SVG Berlapis Warna Solid di Bawah Nama Kaprodi -->
                     <svg id="svg-kaprodi-divider" width="270" height="3" viewBox="0 0 270 3" style="display: block; margin: 10px auto 5px auto; flex-shrink: 0;" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="0" y="1" width="270" height="1" rx="0.5" fill="#C59B27" fill-opacity="0.35" />
-                      <rect x="35" y="0.5" width="200" height="2" rx="1" fill="#C59B27" />
-                      <rect x="85" y="0" width="100" height="3" rx="1.5" fill="#E6C567" />
+                      <rect class="svg-gold-fill" x="0" y="1" width="270" height="1" rx="0.5" fill="#C59B27" fill-opacity="0.35" />
+                      <rect class="svg-gold-fill" x="35" y="0.5" width="200" height="2" rx="1" fill="#C59B27" />
+                      <rect class="svg-gold-fill" x="85" y="0" width="100" height="3" rx="1.5" fill="#E6C567" />
                     </svg>
 
                     <p id="cert-kaprodi-nip" style="font-size: 11px; font-weight: 500; color: #475569; letter-spacing: 0.02em; line-height: 1.25; margin: 0;">
@@ -1527,9 +1815,67 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
       const GDRIVE_AUTO_LOGO_KEY = 'unpad_tik_sv_gdrive_auto_logo_v11';
       const CUSTOM_LOGOS_STORAGE_KEY = 'unpad_tik_sv_custom_logos_v11';
       const VERIFY_CARD_PREFS_KEY = 'unpad_tik_sv_verify_card_prefs_v11';
+      const DESIGN_PREFS_KEY = 'unpad_tik_sv_design_prefs_v11';
 
       const DEFAULT_GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwZtw5jqftD776_RAOzQ6cf9BYmUqDY8qgFqd_eX-oKOf3zYGGqjl-670sYYd_nRJ4/exec';
       const OFFICIAL_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1Tpvrl3KbKPBYOGtab4OZKoI4b8aA4vWt-1Ju-IXC-vU/edit?gid=0#gid=0';
+
+      const DESIGN_THEME_PRESETS = {
+        unpadClassic: {
+          paperColor: '#FDFCF8',
+          primaryColor: '#0F2537',
+          accentColor: '#0D7377',
+          goldColor: '#C59B27',
+          badgeBg: '#0F2537',
+          badgeText: '#F4D57A',
+          isDark: false
+        },
+        emeraldVokasi: {
+          paperColor: '#FAFDFB',
+          primaryColor: '#064E3B',
+          accentColor: '#0F766E',
+          goldColor: '#C59B27',
+          badgeBg: '#064E3B',
+          badgeText: '#FDE68A',
+          isDark: false
+        },
+        royalMaroon: {
+          paperColor: '#FDFBF9',
+          primaryColor: '#4C0519',
+          accentColor: '#9F1239',
+          goldColor: '#B48A28',
+          badgeBg: '#4C0519',
+          badgeText: '#FDE68A',
+          isDark: false
+        },
+        processCyan: {
+          paperColor: '#F8FAFC',
+          primaryColor: '#0F172A',
+          accentColor: '#0284C7',
+          goldColor: '#D97706',
+          badgeBg: '#0F172A',
+          badgeText: '#38BDF8',
+          isDark: false
+        },
+        cleanPlatinum: {
+          paperColor: '#FFFFFF',
+          primaryColor: '#1E293B',
+          accentColor: '#0D7377',
+          goldColor: '#94A3B8',
+          badgeBg: '#1E293B',
+          badgeText: '#F8FAFC',
+          isDark: false
+        },
+        darkExecutive: {
+          paperColor: '#0B192C',
+          primaryColor: '#F8FAFC',
+          accentColor: '#2DD4BF',
+          goldColor: '#E5B94C',
+          badgeBg: '#E5B94C',
+          badgeText: '#0B192C',
+          isDark: true
+        }
+      };
 
       const VERIFY_BADGE_THEMES = {
         emerald: { fill: '#ECFDF5', stroke: '#A7F3D0', text: '#065F46' },
@@ -1574,6 +1920,17 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
         gasAutoSync: true,
         gdriveFolderInput: '',
         gdriveAutoLogo: true,
+        design: {
+          preset: 'unpadClassic',
+          paperColor: '#FDFCF8',
+          primaryColor: '#0F2537',
+          accentColor: '#0D7377',
+          goldColor: '#C59B27',
+          frameStyle: 'classic',
+          watermarkPattern: 'benzene',
+          watermarkOpacity: 5,
+          fontPairing: 'classic'
+        },
         archives: []
       };
 
@@ -1611,6 +1968,11 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
         singleRecipientPanel: document.getElementById('single-recipient-panel'),
         batchRecipientPanel: document.getElementById('batch-recipient-panel'),
         inpRecipient: document.getElementById('inp-recipient'),
+        inpImportExcel: document.getElementById('inp-import-excel'),
+        btnDownloadBatchTemplate: document.getElementById('btn-download-batch-template'),
+        selExcelImportMode: document.getElementById('sel-excel-import-mode'),
+        chkExcelHasHeader: document.getElementById('chk-excel-has-header'),
+        excelImportStatus: document.getElementById('excel-import-status'),
         inpBatchNames: document.getElementById('inp-batch-names'),
         batchCountBadge: document.getElementById('batch-count-badge'),
         subnumberStartBox: document.getElementById('subnumber-start-box'),
@@ -1634,7 +1996,18 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
         inpTopic: document.getElementById('inp-topic'),
         inpEventDate: document.getElementById('inp-event-date'),
 
-        // Tab 2 Controls
+        // Tab 2 Design Controls
+        btnResetDesign: document.getElementById('btn-reset-design'),
+        inpColorPaper: document.getElementById('inp-color-paper'),
+        inpColorPrimary: document.getElementById('inp-color-primary'),
+        inpColorAccent: document.getElementById('inp-color-accent'),
+        inpColorGold: document.getElementById('inp-color-gold'),
+        selWatermarkPattern: document.getElementById('sel-watermark-pattern'),
+        selFontPairing: document.getElementById('sel-font-pairing'),
+        inpWatermarkOpacity: document.getElementById('inp-watermark-opacity'),
+        valWatermarkOpacity: document.getElementById('val-watermark-opacity'),
+
+        // Tab 3 Controls (Logo, Bahasa & TTD)
         inpUniv: document.getElementById('inp-univ'),
         inpFaculty: document.getElementById('inp-faculty'),
         inpProdi: document.getElementById('inp-prodi'),
@@ -1811,8 +2184,8 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
         document.querySelectorAll('.sidebar-tab-btn').forEach((b) => {
           const isMatch = b.getAttribute('data-tab') === targetId;
           b.className = isMatch
-            ? 'sidebar-tab-btn py-2 px-2 rounded-xl text-xs font-bold bg-[#0F2942] text-white shadow-2xs transition cursor-pointer flex items-center justify-center gap-1.5'
-            : 'sidebar-tab-btn py-2 px-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-[#0F2942] hover:bg-slate-100 transition cursor-pointer flex items-center justify-center gap-1.5';
+            ? 'sidebar-tab-btn py-2 px-1.5 rounded-xl text-[11px] font-bold bg-[#0F2942] text-white shadow-2xs transition cursor-pointer flex items-center justify-center gap-1'
+            : 'sidebar-tab-btn py-2 px-1.5 rounded-xl text-[11px] font-semibold text-slate-600 hover:text-[#0F2942] hover:bg-slate-100 transition cursor-pointer flex items-center justify-center gap-1';
         });
 
         document.querySelectorAll('.tab-panel').forEach((panel) => {
@@ -1843,80 +2216,301 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
       }
 
       // =========================================================================
-      // PERHITUNGAN LEBAR KOTAK SVG DINAMIS (100% PRESISI TENGAH & ANTI-TERPOTONG)
+      // KUSTOMISASI DESAIN SERTIFIKAT (TEMA, WARNA, BINGKAI, WATERMARK & FONT)
       // =========================================================================
-      const _svgMeasureCanvas = document.createElement('canvas');
-      const _svgMeasureCtx = _svgMeasureCanvas.getContext('2d');
-
-      function fitSvgPill(svgEl, rectEl, textEl, padX, minW, height, charAvgPx, safetyScale = 1.16) {
-        if (!svgEl || !rectEl || !textEl) return;
-
-        const rawText = (textEl.textContent || '').trim();
-        const fontSize = parseFloat(textEl.getAttribute('font-size') || '11');
-        const letterSpacing = parseFloat(textEl.getAttribute('letter-spacing') || '0');
-        const fontWeight = textEl.getAttribute('font-weight') || '700';
-        const fontFamily = textEl.getAttribute('font-family') || "'Plus Jakarta Sans', Arial, sans-serif";
-
-        let measuredDomWidth = 0;
-        try {
-          if (typeof textEl.getComputedTextLength === 'function') {
-            measuredDomWidth = textEl.getComputedTextLength();
-          }
-        } catch (e) {
-          measuredDomWidth = 0;
-        }
-
-        let measuredCanvasWidth = 0;
-        if (_svgMeasureCtx && rawText.length > 0) {
-          _svgMeasureCtx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-          const baseAdvance = _svgMeasureCtx.measureText(rawText).width;
-          const trackingAdvance = Math.max(0, rawText.length - 1) * letterSpacing;
-          measuredCanvasWidth = baseAdvance + trackingAdvance;
-        }
-
-        const fallbackWidth = rawText.length * (charAvgPx + letterSpacing);
-        const effectiveTextWidth = Math.max(
-          measuredDomWidth * safetyScale,
-          measuredCanvasWidth * safetyScale,
-          fallbackWidth
-        );
-        const totalW = Math.max(minW, Math.ceil(effectiveTextWidth + padX * 2));
-
-        svgEl.setAttribute('width', String(totalW));
-        svgEl.setAttribute('height', String(height));
-        svgEl.setAttribute('viewBox', `0 0 ${totalW} ${height}`);
-
-        const hasStroke = rectEl.hasAttribute('stroke');
-        const inset = hasStroke ? 0.5 : 0;
-        rectEl.setAttribute('x', String(inset));
-        rectEl.setAttribute('y', String(inset));
-        rectEl.setAttribute('width', String(Math.max(10, totalW - inset * 2)));
-        rectEl.setAttribute('height', String(Math.max(10, height - inset * 2)));
-
-        textEl.setAttribute('x', String(totalW / 2));
-        textEl.setAttribute('y', String(height / 2));
+      function isHexDark(hex) {
+        const clean = String(hex || '').replace('#', '');
+        if (clean.length !== 6) return false;
+        const r = parseInt(clean.slice(0, 2), 16);
+        const g = parseInt(clean.slice(2, 4), 16);
+        const b = parseInt(clean.slice(4, 6), 16);
+        const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        return lum < 0.45;
       }
 
-      function updateAllDynamicSvgBadges(rootDoc = document) {
-        fitSvgPill(
-          rootDoc.getElementById('svg-num-pill'),
-          rootDoc.getElementById('svg-num-rect'),
-          rootDoc.getElementById('svg-num-text'),
-          18, 180, 26, 6.6, 1.08
-        );
-        fitSvgPill(
-          rootDoc.getElementById('svg-role-badge'),
-          rootDoc.getElementById('svg-role-rect'),
-          rootDoc.getElementById('cert-role-badge'),
-          22, 160, 28, 8.9, 1.12
-        );
-        const verifyBadgeHeight = Math.max(20, Math.round(state.verifyBadgeFontSize * 2.55));
-        fitSvgPill(
-          rootDoc.getElementById('svg-verify-badge'),
-          rootDoc.getElementById('svg-verify-rect'),
-          rootDoc.getElementById('cert-verify-badge'),
-          18, 220, verifyBadgeHeight, state.verifyBadgeFontSize * 0.8, 1.12
-        );
+      function saveDesignPrefs() {
+        try {
+          localStorage.setItem(DESIGN_PREFS_KEY, JSON.stringify(state.design));
+        } catch (e) {
+          // Abaikan jika mode privat
+        }
+      }
+
+      function loadDesignPrefs() {
+        try {
+          const raw = localStorage.getItem(DESIGN_PREFS_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          state.design = { ...state.design, ...parsed };
+        } catch (e) {
+          // Gunakan default
+        }
+      }
+
+      function applyCertificateDesign() {
+        const d = state.design;
+        const presetCfg = DESIGN_THEME_PRESETS[d.preset] || DESIGN_THEME_PRESETS.unpadClassic;
+        const darkPaper = isHexDark(d.paperColor);
+
+        // Sinkronkan kontrol UI di Tab Desain
+        dom.inpColorPaper.value = d.paperColor;
+        dom.inpColorPrimary.value = d.primaryColor;
+        dom.inpColorAccent.value = d.accentColor;
+        dom.inpColorGold.value = d.goldColor;
+        dom.selWatermarkPattern.value = d.watermarkPattern;
+        dom.selFontPairing.value = d.fontPairing;
+        dom.inpWatermarkOpacity.value = String(d.watermarkOpacity);
+        dom.valWatermarkOpacity.textContent = `${d.watermarkOpacity}%`;
+
+        document.querySelectorAll('.design-preset-btn').forEach((btn) => {
+          const active = btn.getAttribute('data-theme-preset') === d.preset;
+          btn.className = active
+            ? 'design-preset-btn p-2.5 rounded-xl border-2 border-[#0D7377] bg-teal-50/40 text-left transition cursor-pointer'
+            : 'design-preset-btn p-2.5 rounded-xl border border-slate-200 bg-white hover:border-[#0D7377] text-left transition cursor-pointer';
+        });
+
+        document.querySelectorAll('.frame-style-btn').forEach((btn) => {
+          const active = btn.getAttribute('data-frame-style') === d.frameStyle;
+          btn.className = active
+            ? 'frame-style-btn p-2.5 rounded-xl border-2 border-[#0D7377] bg-teal-50/40 text-left transition cursor-pointer'
+            : 'frame-style-btn p-2.5 rounded-xl border border-slate-200 bg-white hover:border-[#0D7377] text-left transition cursor-pointer';
+        });
+
+        // 1. Latar kertas SVG & CSS
+        const paperBgEl = document.getElementById('cert-svg-paper-bg');
+        if (paperBgEl) paperBgEl.setAttribute('fill', d.paperColor);
+        dom.certCanvas.style.backgroundColor = d.paperColor;
+
+        // 2. Warna elemen bingkai & garis SVG
+        const framePrimaryColor = darkPaper ? d.goldColor : d.primaryColor;
+        document.querySelectorAll('#cert-bg-svg .svg-primary-stroke').forEach((el) => el.setAttribute('stroke', framePrimaryColor));
+        document.querySelectorAll('#cert-bg-svg .svg-primary-fill').forEach((el) => el.setAttribute('fill', framePrimaryColor));
+        document.querySelectorAll('#cert-bg-svg .svg-accent-stroke').forEach((el) => el.setAttribute('stroke', d.accentColor));
+        document.querySelectorAll('#cert-bg-svg .svg-accent-fill').forEach((el) => el.setAttribute('fill', d.accentColor));
+        document.querySelectorAll('#cert-bg-svg .svg-gold-stroke').forEach((el) => el.setAttribute('stroke', d.goldColor));
+        document.querySelectorAll('#cert-bg-svg .svg-gold-fill, #certificate-canvas .svg-gold-fill').forEach((el) => el.setAttribute('fill', d.goldColor));
+
+        // 3. Gaya Bingkai SVG (classic, modern, ornate, executive)
+        ['classic', 'modern', 'ornate', 'executive'].forEach((styleKey) => {
+          const groupEl = document.getElementById(`cert-frame-${styleKey}`);
+          if (groupEl) {
+            groupEl.classList.toggle('hidden', d.frameStyle !== styleKey);
+          }
+        });
+
+        // 4. Watermark Kimia & Transparansi
+        const opVal = (d.watermarkOpacity / 100).toFixed(2);
+        ['benzene', 'hexgrid', 'orbit'].forEach((wmKey) => {
+          const wmEl = document.getElementById(`cert-watermark-${wmKey}`);
+          if (wmEl) {
+            wmEl.classList.toggle('hidden', d.watermarkPattern !== wmKey);
+            wmEl.setAttribute('stroke', d.accentColor);
+            wmEl.setAttribute('opacity', opVal);
+          }
+        });
+
+        // 5. Warna Tipografi Konten Sertifikat
+        const headingTextColor = darkPaper ? '#F8FAFC' : d.primaryColor;
+        const bodyTextColor = darkPaper ? '#CBD5E1' : '#334155';
+        const mutedTextColor = darkPaper ? '#94A3B8' : '#475569';
+
+        dom.certUniv.style.color = d.accentColor;
+        dom.certFaculty.style.color = headingTextColor;
+        dom.certProdi.style.color = headingTextColor;
+        dom.certMainTitle.style.color = headingTextColor;
+        dom.certSubtitle.style.color = d.accentColor;
+        dom.certRecipientName.style.color = headingTextColor;
+        dom.certTopic.style.color = d.accentColor;
+        dom.certPresentedLabel.style.color = mutedTextColor;
+        dom.certRolePrefix.style.color = headingTextColor;
+        dom.certContextLine.style.color = headingTextColor;
+        dom.certEventDesc.style.color = bodyTextColor;
+        dom.certCityDate.style.color = headingTextColor;
+        dom.certKaprodiTitle.style.color = headingTextColor;
+        dom.certKaprodiName.style.color = headingTextColor;
+        dom.certKaprodiNip.style.color = mutedTextColor;
+
+        // Kapsul Nomor Surat & Lencana Peran
+        const numRect = document.getElementById('svg-num-rect');
+        const numText = document.getElementById('svg-num-text');
+        if (numRect && numText) {
+          numRect.setAttribute('fill', darkPaper ? 'rgba(255,255,255,0.08)' : 'rgba(15, 41, 66, 0.06)');
+          numRect.setAttribute('stroke', darkPaper ? 'rgba(255,255,255,0.28)' : 'rgba(15, 41, 66, 0.2)');
+          numText.setAttribute('fill', headingTextColor);
+        }
+
+        const roleRect = document.getElementById('svg-role-rect');
+        if (roleRect && dom.certRoleBadge) {
+          const badgeFill = darkPaper ? d.goldColor : (d.preset === 'custom' ? d.primaryColor : presetCfg.badgeBg);
+          const badgeTxt = darkPaper ? '#0B192C' : (d.preset === 'custom' ? '#F4D57A' : presetCfg.badgeText);
+          roleRect.setAttribute('fill', badgeFill);
+          dom.certRoleBadge.setAttribute('fill', badgeTxt);
+        }
+
+        // Kartu Verifikasi Kiri Bawah (tetap kontras tinggi)
+        dom.certVerifyCard.style.backgroundColor = darkPaper
+          ? 'rgba(15, 35, 60, 0.94)'
+          : 'rgba(255, 255, 255, 0.95)';
+        dom.certVerifyCard.style.borderColor = darkPaper
+          ? 'rgba(229, 185, 76, 0.45)'
+          : 'rgba(15, 41, 66, 0.22)';
+        dom.certArchiveId.style.color = darkPaper ? '#F8FAFC' : d.primaryColor;
+        dom.certVerifyProdi.style.color = darkPaper ? '#E2E8F0' : '#334155';
+        dom.certVerifyAuthority.style.color = d.accentColor;
+
+        // 6. Kombinasi Font
+        if (d.fontPairing === 'royal') {
+          dom.certMainTitle.style.fontFamily = "'Cormorant Garamond', serif";
+          dom.certMainTitle.style.fontWeight = '700';
+          dom.certRecipientName.style.fontFamily = "'Cormorant Garamond', serif";
+          dom.certRecipientName.style.fontStyle = 'italic';
+          dom.certTopic.style.fontFamily = "'Cormorant Garamond', serif";
+        } else if (d.fontPairing === 'modern') {
+          dom.certMainTitle.style.fontFamily = "'Montserrat', sans-serif";
+          dom.certMainTitle.style.fontWeight = '800';
+          dom.certRecipientName.style.fontFamily = "'Plus Jakarta Sans', sans-serif";
+          dom.certRecipientName.style.fontStyle = 'normal';
+          dom.certTopic.style.fontFamily = "'Plus Jakarta Sans', sans-serif";
+        } else {
+          dom.certMainTitle.style.fontFamily = "'Cinzel', serif";
+          dom.certMainTitle.style.fontWeight = '700';
+          dom.certRecipientName.style.fontFamily = "'Playfair Display', serif";
+          dom.certRecipientName.style.fontStyle = 'normal';
+          dom.certTopic.style.fontFamily = "'Playfair Display', serif";
+        }
+
+        applyRecipientFontSize();
+      }
+
+      // =========================================================================
+      // IMPOR DAFTAR NAMA MASSAL DARI EXCEL (.XLSX / .XLS) & CSV
+      // =========================================================================
+      function parseDelimitedTextRows(rawText) {
+        const lines = String(rawText || '').split(/\r?\n/).filter((l) => l.trim().length > 0);
+        return lines.map((line) => {
+          const delim = line.includes('\t') ? '\t' : (line.includes(';') ? ';' : ',');
+          return line.split(delim).map((cell) => cell.replace(/^["']|["']$/g, '').trim());
+        });
+      }
+
+      function detectNameColumnIndex(rows) {
+        if (!rows || rows.length === 0) return 0;
+        const firstRow = rows[0] || [];
+        const headerRegex = /^(nama|name|nama\s*lengkap|peserta|penerima|recipient|dosen|narasumber|panitia|full\s*name)/i;
+
+        for (let c = 0; c < firstRow.length; c++) {
+          const cellVal = String(firstRow[c] || '').trim();
+          if (headerRegex.test(cellVal)) {
+            return c;
+          }
+        }
+
+        // Jika kolom pertama berupa nomor urut (1, 2, 3 atau header "No"), ambil kolom kedua
+        if (firstRow.length >= 2) {
+          const col0Sample = String(rows[Math.min(1, rows.length - 1)][0] || '').trim();
+          const header0 = String(firstRow[0] || '').trim();
+          if (/^(no|nomor|#)$/i.test(header0) || /^\d+\.?$/.test(col0Sample)) {
+            return 1;
+          }
+        }
+
+        return 0;
+      }
+
+      async function handleImportBatchSpreadsheet(file) {
+        if (!file) return;
+        const hasHeader = Boolean(dom.chkExcelHasHeader.checked);
+        const importMode = dom.selExcelImportMode.value || 'replace';
+
+        try {
+          let rows = [];
+          const fileNameLower = file.name.toLowerCase();
+
+          if (typeof XLSX !== 'undefined' && (fileNameLower.endsWith('.xlsx') || fileNameLower.endsWith('.xls') || fileNameLower.endsWith('.csv'))) {
+            const arrayBuffer = await file.arrayBuffer();
+            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+          } else {
+            const textContent = await file.text();
+            rows = parseDelimitedTextRows(textContent);
+          }
+
+          const nonEmptyRows = rows.filter((r) => Array.isArray(r) && r.some((cell) => String(cell || '').trim() !== ''));
+          if (nonEmptyRows.length === 0) {
+            showToast('File kosong atau tidak berisi data nama penerima.', 'warning');
+            return;
+          }
+
+          const nameColIdx = detectNameColumnIndex(nonEmptyRows);
+          const headerKeywords = /^(no|nomor|nama|name|nama\s*lengkap|peserta|penerima|recipient|full\s*name)$/i;
+
+          const extractedNames = [];
+          nonEmptyRows.forEach((row, rowIndex) => {
+            const candidate = String(row[nameColIdx] || '').trim();
+            if (!candidate) return;
+            if (rowIndex === 0 && (hasHeader || headerKeywords.test(candidate))) {
+              return;
+            }
+            extractedNames.push(candidate);
+          });
+
+          if (extractedNames.length === 0) {
+            showToast('Tidak ditemukan nama valid di dalam file tersebut.', 'warning');
+            return;
+          }
+
+          if (importMode === 'append') {
+            const existing = (dom.inpBatchNames.value || '')
+              .split(/\r?\n/)
+              .map((l) => l.trim())
+              .filter(Boolean);
+            dom.inpBatchNames.value = [...existing, ...extractedNames].join('\n');
+          } else {
+            dom.inpBatchNames.value = extractedNames.join('\n');
+            state.batchPreviewIdx = 0;
+          }
+
+          dom.excelImportStatus.textContent = `+${extractedNames.length} nama (${file.name})`;
+          renderBatchPreviewTable();
+          updateCertificate();
+          showToast(`Berhasil mengimpor ${extractedNames.length} nama penerima dari "${file.name}"!`, 'success');
+        } catch (err) {
+          console.error('Import Excel/CSV error:', err);
+          showToast('Gagal membaca file Excel/CSV. Pastikan format file valid.', 'warning');
+        }
+      }
+
+      function downloadBatchExcelTemplate() {
+        const sampleRows = [
+          ['No', 'Nama Lengkap & Gelar'],
+          [1, 'Prof. Dr. Ir. Hendra Wijaya, S.T., M.T., IPM.'],
+          [2, 'Dr. Eng. Ratna Kusumawardani, S.T., M.Sc.'],
+          [3, 'Dr. Ir. Bambang Setiawan, M.T., IPU.'],
+          [4, 'Apt. Siti Nurhaliza, S.Farm., M.Si.'],
+          [5, 'Ir. Bagus Pratama, S.T., M.M.']
+        ];
+
+        if (typeof XLSX !== 'undefined') {
+          const wb = XLSX.utils.book_new();
+          const ws = XLSX.utils.aoa_to_sheet(sampleRows);
+          ws['!cols'] = [{ wch: 6 }, { wch: 45 }];
+          XLSX.utils.book_append_sheet(wb, ws, 'Daftar_Penerima');
+          XLSX.writeFile(wb, 'Template_Daftar_Penerima_Sertifikat_TIK.xlsx');
+          showToast('Template Excel (.xlsx) berhasil diunduh!', 'success');
+          return;
+        }
+
+        const csvContent = sampleRows.map((r) => r.map((c) => `"${c}"`).join(',')).join('\r\n');
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Template_Daftar_Penerima_Sertifikat_TIK.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Template CSV berhasil diunduh!', 'success');
       }
 
       // =========================================================================
@@ -2485,6 +3079,84 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
       }
 
       // =========================================================================
+      // PENYESUAIAN LEBAR DINAMIS KAPSUL & LENCANA SVG
+      // =========================================================================
+      function fitSvgPill(svgEl, rectEl, textEl, padX = 18, minW = 180, height = 26, charWidthFallback = 7, scaleFactor = 1.08, maxW = 840) {
+        if (!svgEl || !rectEl || !textEl) return;
+
+        let measuredTextW = 0;
+        try {
+          if (typeof textEl.getComputedTextLength === 'function') {
+            measuredTextW = textEl.getComputedTextLength();
+          } else if (typeof textEl.getBBox === 'function') {
+            measuredTextW = textEl.getBBox().width;
+          }
+        } catch (e) {
+          measuredTextW = 0;
+        }
+
+        if (!measuredTextW || measuredTextW <= 0) {
+          const rawText = (textEl.textContent || '').trim();
+          measuredTextW = rawText.length * charWidthFallback;
+        }
+
+        const totalW = Math.min(
+          maxW,
+          Math.max(minW, Math.ceil(measuredTextW * scaleFactor + padX * 2))
+        );
+        const h = height || parseFloat(svgEl.getAttribute('height')) || 26;
+
+        svgEl.setAttribute('width', String(totalW));
+        svgEl.setAttribute('height', String(h));
+        svgEl.setAttribute('viewBox', `0 0 ${totalW} ${h}`);
+
+        const inset = parseFloat(rectEl.getAttribute('x')) > 0 ? 0.5 : 0;
+        rectEl.setAttribute('width', String(Math.max(10, totalW - inset * 2)));
+        rectEl.setAttribute('height', String(Math.max(10, h - inset * 2)));
+
+        textEl.setAttribute('x', String(totalW / 2));
+        textEl.setAttribute('y', String(h / 2));
+      }
+
+      function updateAllDynamicSvgBadges() {
+        fitSvgPill(
+          document.getElementById('svg-num-pill'),
+          document.getElementById('svg-num-rect'),
+          document.getElementById('svg-num-text'),
+          18,
+          180,
+          26,
+          6.6,
+          1.08,
+          820
+        );
+
+        fitSvgPill(
+          document.getElementById('svg-role-badge'),
+          document.getElementById('svg-role-rect'),
+          document.getElementById('cert-role-badge'),
+          22,
+          160,
+          28,
+          8.9,
+          1.12,
+          620
+        );
+
+        fitSvgPill(
+          document.getElementById('svg-verify-badge'),
+          document.getElementById('svg-verify-rect'),
+          document.getElementById('cert-verify-badge'),
+          18,
+          220,
+          Math.max(20, Math.round(state.verifyBadgeFontSize * 2.55)),
+          state.verifyBadgeFontSize * 0.8,
+          1.12,
+          390
+        );
+      }
+
+      // =========================================================================
       // SINKRONISASI SELURUH ELEMEN SERTIFIKAT
       // =========================================================================
       function updateCertificate() {
@@ -2691,7 +3363,7 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
                 width: 1123,
                 height: 794,
                 pixelRatio: pixelRatio,
-                backgroundColor: '#FDFCF8',
+                backgroundColor: state.design.paperColor || '#FDFCF8',
                 cacheBust: true
               });
             } catch (htiErr) {
@@ -2708,7 +3380,7 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
             scrollX: 0,
             scrollY: 0,
             useCORS: true,
-            backgroundColor: '#FDFCF8',
+            backgroundColor: state.design.paperColor || '#FDFCF8',
             logging: false
           });
           return canvas.toDataURL('image/png');
@@ -3959,6 +4631,91 @@ function doPost(e) {
       dom.btnModeSingle.addEventListener('click', () => switchInputMode('single'));
       dom.btnModeBatch.addEventListener('click', () => switchInputMode('batch'));
 
+      // Impor Excel / CSV & Unduh Template
+      dom.inpImportExcel.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        await handleImportBatchSpreadsheet(file);
+        e.target.value = '';
+      });
+
+      dom.btnDownloadBatchTemplate.addEventListener('click', downloadBatchExcelTemplate);
+
+      // Event Listener Kustomisasi Desain Sertifikat (Tab 2)
+      document.querySelectorAll('.design-preset-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const presetKey = btn.getAttribute('data-theme-preset');
+          const cfg = DESIGN_THEME_PRESETS[presetKey];
+          if (!cfg) return;
+          state.design.preset = presetKey;
+          state.design.paperColor = cfg.paperColor;
+          state.design.primaryColor = cfg.primaryColor;
+          state.design.accentColor = cfg.accentColor;
+          state.design.goldColor = cfg.goldColor;
+          applyCertificateDesign();
+          saveDesignPrefs();
+          showToast('Tema desain sertifikat diterapkan!', 'info');
+        });
+      });
+
+      [
+        [dom.inpColorPaper, 'paperColor'],
+        [dom.inpColorPrimary, 'primaryColor'],
+        [dom.inpColorAccent, 'accentColor'],
+        [dom.inpColorGold, 'goldColor']
+      ].forEach(([inputEl, propKey]) => {
+        if (!inputEl) return;
+        inputEl.addEventListener('input', (e) => {
+          state.design.preset = 'custom';
+          state.design[propKey] = e.target.value;
+          applyCertificateDesign();
+          saveDesignPrefs();
+        });
+      });
+
+      document.querySelectorAll('.frame-style-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.design.frameStyle = btn.getAttribute('data-frame-style') || 'classic';
+          applyCertificateDesign();
+          saveDesignPrefs();
+        });
+      });
+
+      dom.selWatermarkPattern.addEventListener('change', (e) => {
+        state.design.watermarkPattern = e.target.value;
+        applyCertificateDesign();
+        saveDesignPrefs();
+      });
+
+      dom.selFontPairing.addEventListener('change', (e) => {
+        state.design.fontPairing = e.target.value;
+        applyCertificateDesign();
+        saveDesignPrefs();
+      });
+
+      dom.inpWatermarkOpacity.addEventListener('input', (e) => {
+        state.design.watermarkOpacity = parseInt(e.target.value, 10) || 0;
+        applyCertificateDesign();
+        saveDesignPrefs();
+      });
+
+      dom.btnResetDesign.addEventListener('click', () => {
+        state.design = {
+          preset: 'unpadClassic',
+          paperColor: '#FDFCF8',
+          primaryColor: '#0F2537',
+          accentColor: '#0D7377',
+          goldColor: '#C59B27',
+          frameStyle: 'classic',
+          watermarkPattern: 'benzene',
+          watermarkOpacity: 5,
+          fontPairing: 'classic'
+        };
+        applyCertificateDesign();
+        saveDesignPrefs();
+        showToast('Desain sertifikat dikembalikan ke default Klasik Unpad', 'info');
+      });
+
       dom.inpBatchNames.addEventListener('input', () => {
         renderBatchPreviewTable();
         updateCertificate();
@@ -4341,10 +5098,12 @@ function doPost(e) {
       // INISIALISASI SAAT HALAMAN SIAP
       // =========================================================================
       function init() {
+        loadDesignPrefs();
         loadCustomLogosFromLocal();
         loadVerifyCardPrefs();
         renderHeaderLogos();
         renderFooterLogo();
+        applyCertificateDesign();
         applyVerificationCardLayout();
         loadGasSettings();
         loadArchives();
