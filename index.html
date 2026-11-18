@@ -735,9 +735,15 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
 
           <!-- Kartu Verifikasi & Arsip Kiri Bawah -->
           <div class="bg-white border border-slate-200 rounded-2xl p-3.5 shadow-2xs space-y-3">
-            <div class="flex items-center gap-2">
-              <span class="w-1.5 h-4 rounded-full bg-emerald-600"></span>
-              <h2 class="text-xs font-bold uppercase tracking-wider text-[#0F2942]">Kartu Verifikasi &amp; Arsip Prodi (Kiri Bawah)</h2>
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="w-1.5 h-4 rounded-full bg-emerald-600"></span>
+                <h2 class="text-xs font-bold uppercase tracking-wider text-[#0F2942]">Kartu Verifikasi &amp; Arsip Prodi (Kiri Bawah)</h2>
+              </div>
+              <button id="btn-reset-verify-layout" type="button" title="Kembalikan ukuran QR &amp; kartu verifikasi ke default"
+                class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-semibold transition cursor-pointer">
+                Reset Ukuran
+              </button>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -750,6 +756,57 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
                 <label for="inp-verify-authority" class="block text-xs font-semibold text-slate-700 mb-1">Otoritas Verifikasi Resmi</label>
                 <input id="inp-verify-authority" type="text" value="Ketua Program Studi TIK"
                   class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 focus:border-[#0D7377] text-xs font-semibold text-[#0F2942] outline-none" />
+              </div>
+            </div>
+
+            <!-- Kustomisasi Teks & Tema Lencana Status Verifikasi -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div class="sm:col-span-2">
+                <label for="inp-verify-badge-text" class="block text-xs font-semibold text-slate-700 mb-1">Teks Lencana Status Verifikasi</label>
+                <input id="inp-verify-badge-text" type="text" value="DOKUMEN TERARSIP &amp; TERVERIFIKASI"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 focus:border-[#0D7377] text-xs font-bold text-[#065F46] outline-none" />
+              </div>
+              <div>
+                <label for="sel-verify-badge-theme" class="block text-xs font-semibold text-slate-700 mb-1">Warna Lencana</label>
+                <select id="sel-verify-badge-theme"
+                  class="w-full px-2.5 py-2 rounded-xl bg-slate-50 border border-slate-300 focus:border-[#0D7377] text-xs font-semibold text-[#0F2942] outline-none cursor-pointer">
+                  <option value="emerald">Hijau Resmi</option>
+                  <option value="navy">Navy &amp; Emas</option>
+                  <option value="gold">Emas Akademik</option>
+                  <option value="hidden">Sembunyikan</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Pengaturan Ukuran QR Code, Logo Verifikasi, Font Lencana & Skala Kartu -->
+            <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <div>
+                <div class="flex justify-between text-[11px] text-slate-700 mb-1">
+                  <span class="font-semibold">Ukuran QR Code</span>
+                  <span id="val-qr-size" class="font-mono font-bold text-[#0D7377]">58px</span>
+                </div>
+                <input id="inp-qr-size" type="range" min="42" max="96" value="58" class="w-full cursor-pointer" />
+              </div>
+              <div>
+                <div class="flex justify-between text-[11px] text-slate-700 mb-1">
+                  <span class="font-semibold">Ukuran Logo Kartu</span>
+                  <span id="val-footer-logo-size" class="font-mono font-bold text-[#0D7377]">46px</span>
+                </div>
+                <input id="inp-footer-logo-size" type="range" min="30" max="72" value="46" class="w-full cursor-pointer" />
+              </div>
+              <div>
+                <div class="flex justify-between text-[11px] text-slate-700 mb-1">
+                  <span class="font-semibold">Font Lencana Status</span>
+                  <span id="val-verify-badge-font" class="font-mono font-bold text-[#0D7377]">8.5px</span>
+                </div>
+                <input id="inp-verify-badge-font" type="range" min="7" max="11.5" step="0.5" value="8.5" class="w-full cursor-pointer" />
+              </div>
+              <div>
+                <div class="flex justify-between text-[11px] text-slate-700 mb-1">
+                  <span class="font-semibold">Skala Kartu Bawah</span>
+                  <span id="val-verify-card-scale" class="font-mono font-bold text-[#0D7377]">100%</span>
+                </div>
+                <input id="inp-verify-card-scale" type="range" min="80" max="120" step="2" value="100" class="w-full cursor-pointer" />
               </div>
             </div>
 
@@ -1096,9 +1153,9 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
 
                   <!-- Kapsul Nomor Sertifikat Berbasis SVG Dinamis -->
                   <div style="display: flex; align-items: center; justify-content: center;">
-                    <svg id="svg-num-pill" width="282" height="26" viewBox="0 0 282 26" style="display: block; overflow: visible;" xmlns="http://www.w3.org/2000/svg">
-                      <rect id="svg-num-rect" x="0.5" y="0.5" width="281" height="25" rx="12.5" fill="rgba(15, 41, 66, 0.06)" stroke="rgba(15, 41, 66, 0.2)" stroke-width="1" />
-                      <text id="svg-num-text" x="50%" y="13" dominant-baseline="central" text-anchor="middle" fill="#0F2942"
+                    <svg id="svg-num-pill" width="324" height="26" viewBox="0 0 324 26" style="display: block; overflow: visible;" xmlns="http://www.w3.org/2000/svg">
+                      <rect id="svg-num-rect" x="0.5" y="0.5" width="323" height="25" rx="12.5" fill="rgba(15, 41, 66, 0.06)" stroke="rgba(15, 41, 66, 0.2)" stroke-width="1" />
+                      <text id="svg-num-text" x="162" y="13" dominant-baseline="central" text-anchor="middle" fill="#0F2942"
                         font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600" letter-spacing="0.44">
                         <tspan id="cert-num-label" font-weight="600">Nomor / No : </tspan><tspan id="cert-num" font-weight="700">042/UN6.SV.TIK/GL/XI/2026</tspan>
                       </text>
@@ -1131,9 +1188,9 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
                 <section style="width: 880px; display: flex; flex-direction: column; align-items: center;">
                   <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; font-size: 13px; color: #0F2942; line-height: 1.3; margin-bottom: 10px;">
                     <span id="cert-role-prefix" style="line-height: 1.2;">Sebagai / As</span>
-                    <svg id="svg-role-badge" width="256" height="28" viewBox="0 0 256 28" style="display: block; flex-shrink: 0; overflow: visible;" xmlns="http://www.w3.org/2000/svg">
-                      <rect id="svg-role-rect" x="0" y="0" width="256" height="28" rx="6" fill="#0F2537" />
-                      <text id="cert-role-badge" x="50%" y="14" dominant-baseline="central" text-anchor="middle" fill="#F4D57A"
+                    <svg id="svg-role-badge" width="312" height="28" viewBox="0 0 312 28" style="display: block; flex-shrink: 0; overflow: visible;" xmlns="http://www.w3.org/2000/svg">
+                      <rect id="svg-role-rect" x="0" y="0" width="312" height="28" rx="6" fill="#0F2537" />
+                      <text id="cert-role-badge" x="156" y="14" dominant-baseline="central" text-anchor="middle" fill="#F4D57A"
                         font-family="'Plus Jakarta Sans', sans-serif" font-size="11.5" font-weight="700" letter-spacing="0.92">GUEST LECTURER • DOSEN TAMU</text>
                     </svg>
                     <span id="cert-context-line" style="line-height: 1.2;">pada Kuliah Umum / in the Guest Lecture titled:</span>
@@ -1154,21 +1211,21 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
                 <footer style="width: 100%; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 6px; box-sizing: border-box;">
 
                   <!-- KIRI BAWAH: KARTU VERIFIKASI & ARSIP RESMI PRODI -->
-                  <div style="display: flex; align-items: center; gap: 12px; background-color: rgba(255, 255, 255, 0.95); border: 1px solid rgba(15, 41, 66, 0.22); border-radius: 12px; padding: 11px 15px; text-align: left; max-width: 565px;">
+                  <div id="cert-verify-card" style="display: flex; align-items: center; gap: 12px; background-color: rgba(255, 255, 255, 0.95); border: 1px solid rgba(15, 41, 66, 0.22); border-radius: 12px; padding: 11px 15px; text-align: left; max-width: 585px; transform-origin: bottom left;">
                     <!-- Logo Kecil Prodi -->
                     <div id="cert-footer-logo-box" style="width: 46px; height: 46px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;"></div>
 
                     <!-- QR Code Canvas Image Sinkron -->
-                    <div style="width: 68px; height: 68px; flex-shrink: 0; background-color: #FFFFFF; padding: 4px; border-radius: 8px; border: 1px solid #CBD5E1; display: flex; align-items: center; justify-content: center;">
+                    <div id="cert-qr-box" style="width: 68px; height: 68px; flex-shrink: 0; background-color: #FFFFFF; padding: 4px; border-radius: 8px; border: 1px solid #CBD5E1; display: flex; align-items: center; justify-content: center;">
                       <img id="cert-qr-img" src="" alt="QR Verifikasi Sertifikat" style="width: 58px; height: 58px; display: block;" />
                     </div>
 
                     <!-- Metadata Arsip & Otoritas Verifikasi -->
                     <div style="border-left: 1px solid #CBD5E1; padding-left: 12px; display: flex; flex-direction: column; align-items: flex-start;">
-                      <div style="margin-bottom: 5px; display: flex; align-items: center;">
-                        <svg id="svg-verify-badge" width="246" height="22" viewBox="0 0 246 22" style="display: block; flex-shrink: 0; overflow: visible;" xmlns="http://www.w3.org/2000/svg">
-                          <rect id="svg-verify-rect" x="0.5" y="0.5" width="245" height="21" rx="5" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1" />
-                          <text id="cert-verify-badge" x="50%" y="11" dominant-baseline="central" text-anchor="middle" fill="#065F46"
+                      <div id="cert-verify-badge-row" style="margin-bottom: 5px; display: flex; align-items: center;">
+                        <svg id="svg-verify-badge" width="266" height="22" viewBox="0 0 266 22" style="display: block; flex-shrink: 0; overflow: visible;" xmlns="http://www.w3.org/2000/svg">
+                          <rect id="svg-verify-rect" x="0.5" y="0.5" width="265" height="21" rx="5" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1" />
+                          <text id="cert-verify-badge" x="133" y="11" dominant-baseline="central" text-anchor="middle" fill="#065F46"
                             font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="8.5" font-weight="800" letter-spacing="0.45">DOKUMEN TERARSIP &amp; TERVERIFIKASI</text>
                         </svg>
                       </div>
@@ -1469,9 +1526,16 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
       const GDRIVE_FOLDER_STORAGE_KEY = 'unpad_tik_sv_gdrive_folder_v11';
       const GDRIVE_AUTO_LOGO_KEY = 'unpad_tik_sv_gdrive_auto_logo_v11';
       const CUSTOM_LOGOS_STORAGE_KEY = 'unpad_tik_sv_custom_logos_v11';
+      const VERIFY_CARD_PREFS_KEY = 'unpad_tik_sv_verify_card_prefs_v11';
 
       const DEFAULT_GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwZtw5jqftD776_RAOzQ6cf9BYmUqDY8qgFqd_eX-oKOf3zYGGqjl-670sYYd_nRJ4/exec';
       const OFFICIAL_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1Tpvrl3KbKPBYOGtab4OZKoI4b8aA4vWt-1Ju-IXC-vU/edit?gid=0#gid=0';
+
+      const VERIFY_BADGE_THEMES = {
+        emerald: { fill: '#ECFDF5', stroke: '#A7F3D0', text: '#065F46' },
+        navy: { fill: '#0F2537', stroke: '#0F2537', text: '#F4D57A' },
+        gold: { fill: '#FEF9E7', stroke: '#C59B27', text: '#7D5A00' }
+      };
 
       // =========================================================================
       // STATE APLIKASI
@@ -1500,6 +1564,11 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
         footerLogoType: 'svg',
         footerLogoContent: SVG_PRODI_TIK_EMBLEM,
         footerLogoDriveUrl: '',
+        qrSize: 58,
+        footerLogoSize: 46,
+        verifyBadgeFontSize: 8.5,
+        verifyCardScale: 100,
+        verifyBadgeTheme: 'emerald',
         qrMode: 'offline',
         gasWebAppUrl: DEFAULT_GAS_WEBAPP_URL,
         gasAutoSync: true,
@@ -1591,6 +1660,17 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
         valSigOffset: document.getElementById('val-sig-offset'),
         inpArchiveId: document.getElementById('inp-archive-id'),
         inpVerifyAuthority: document.getElementById('inp-verify-authority'),
+        btnResetVerifyLayout: document.getElementById('btn-reset-verify-layout'),
+        inpVerifyBadgeText: document.getElementById('inp-verify-badge-text'),
+        selVerifyBadgeTheme: document.getElementById('sel-verify-badge-theme'),
+        inpQrSize: document.getElementById('inp-qr-size'),
+        valQrSize: document.getElementById('val-qr-size'),
+        inpFooterLogoSize: document.getElementById('inp-footer-logo-size'),
+        valFooterLogoSize: document.getElementById('val-footer-logo-size'),
+        inpVerifyBadgeFont: document.getElementById('inp-verify-badge-font'),
+        valVerifyBadgeFont: document.getElementById('val-verify-badge-font'),
+        inpVerifyCardScale: document.getElementById('inp-verify-card-scale'),
+        valVerifyCardScale: document.getElementById('val-verify-card-scale'),
         sidebarFooterLogoThumb: document.getElementById('sidebar-footer-logo-thumb'),
         inpUploadFooterLogo: document.getElementById('inp-upload-footer-logo'),
         btnResetFooterLogo: document.getElementById('btn-reset-footer-logo'),
@@ -1637,8 +1717,13 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
         certContextLine: document.getElementById('cert-context-line'),
         certTopic: document.getElementById('cert-topic'),
         certEventDesc: document.getElementById('cert-event-desc'),
+        certVerifyCard: document.getElementById('cert-verify-card'),
         certFooterLogoBox: document.getElementById('cert-footer-logo-box'),
+        certQrBox: document.getElementById('cert-qr-box'),
         certQrImg: document.getElementById('cert-qr-img'),
+        certVerifyBadgeRow: document.getElementById('cert-verify-badge-row'),
+        svgVerifyBadge: document.getElementById('svg-verify-badge'),
+        svgVerifyRect: document.getElementById('svg-verify-rect'),
         certVerifyBadge: document.getElementById('cert-verify-badge'),
         certArchiveIdLabel: document.getElementById('cert-archive-id-label'),
         certArchiveId: document.getElementById('cert-archive-id'),
@@ -1760,18 +1845,41 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
       // =========================================================================
       // PERHITUNGAN LEBAR KOTAK SVG DINAMIS (100% PRESISI TENGAH & ANTI-TERPOTONG)
       // =========================================================================
+      const _svgMeasureCanvas = document.createElement('canvas');
+      const _svgMeasureCtx = _svgMeasureCanvas.getContext('2d');
+
       function fitSvgPill(svgEl, rectEl, textEl, padX, minW, height, charAvgPx, safetyScale = 1.16) {
         if (!svgEl || !rectEl || !textEl) return;
-        let measuredWidth = 0;
+
+        const rawText = (textEl.textContent || '').trim();
+        const fontSize = parseFloat(textEl.getAttribute('font-size') || '11');
+        const letterSpacing = parseFloat(textEl.getAttribute('letter-spacing') || '0');
+        const fontWeight = textEl.getAttribute('font-weight') || '700';
+        const fontFamily = textEl.getAttribute('font-family') || "'Plus Jakarta Sans', Arial, sans-serif";
+
+        let measuredDomWidth = 0;
         try {
           if (typeof textEl.getComputedTextLength === 'function') {
-            measuredWidth = textEl.getComputedTextLength();
+            measuredDomWidth = textEl.getComputedTextLength();
           }
         } catch (e) {
-          measuredWidth = 0;
+          measuredDomWidth = 0;
         }
-        const fallbackWidth = (textEl.textContent || '').length * charAvgPx;
-        const effectiveTextWidth = Math.max(measuredWidth * safetyScale, fallbackWidth);
+
+        let measuredCanvasWidth = 0;
+        if (_svgMeasureCtx && rawText.length > 0) {
+          _svgMeasureCtx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+          const baseAdvance = _svgMeasureCtx.measureText(rawText).width;
+          const trackingAdvance = Math.max(0, rawText.length - 1) * letterSpacing;
+          measuredCanvasWidth = baseAdvance + trackingAdvance;
+        }
+
+        const fallbackWidth = rawText.length * (charAvgPx + letterSpacing);
+        const effectiveTextWidth = Math.max(
+          measuredDomWidth * safetyScale,
+          measuredCanvasWidth * safetyScale,
+          fallbackWidth
+        );
         const totalW = Math.max(minW, Math.ceil(effectiveTextWidth + padX * 2));
 
         svgEl.setAttribute('width', String(totalW));
@@ -1794,20 +1902,98 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
           rootDoc.getElementById('svg-num-pill'),
           rootDoc.getElementById('svg-num-rect'),
           rootDoc.getElementById('svg-num-text'),
-          14, 160, 26, 6.3, 1.05
+          18, 180, 26, 6.6, 1.08
         );
         fitSvgPill(
           rootDoc.getElementById('svg-role-badge'),
           rootDoc.getElementById('svg-role-rect'),
           rootDoc.getElementById('cert-role-badge'),
-          20, 140, 28, 8.4
+          22, 160, 28, 8.9, 1.12
         );
+        const verifyBadgeHeight = Math.max(20, Math.round(state.verifyBadgeFontSize * 2.55));
         fitSvgPill(
           rootDoc.getElementById('svg-verify-badge'),
           rootDoc.getElementById('svg-verify-rect'),
           rootDoc.getElementById('cert-verify-badge'),
-          16, 236, 22, 6.6
+          18, 220, verifyBadgeHeight, state.verifyBadgeFontSize * 0.8, 1.12
         );
+      }
+
+      // =========================================================================
+      // PENGATURAN UKURAN QR CODE & LENCANA KARTU VERIFIKASI (KIRI BAWAH)
+      // =========================================================================
+      function saveVerifyCardPrefs() {
+        try {
+          localStorage.setItem(VERIFY_CARD_PREFS_KEY, JSON.stringify({
+            qrSize: state.qrSize,
+            footerLogoSize: state.footerLogoSize,
+            verifyBadgeFontSize: state.verifyBadgeFontSize,
+            verifyCardScale: state.verifyCardScale,
+            verifyBadgeTheme: state.verifyBadgeTheme
+          }));
+        } catch (e) {
+          // Abaikan jika mode privat
+        }
+      }
+
+      function loadVerifyCardPrefs() {
+        try {
+          const raw = localStorage.getItem(VERIFY_CARD_PREFS_KEY);
+          if (!raw) return;
+          const prefs = JSON.parse(raw);
+          if (typeof prefs.qrSize === 'number') state.qrSize = prefs.qrSize;
+          if (typeof prefs.footerLogoSize === 'number') state.footerLogoSize = prefs.footerLogoSize;
+          if (typeof prefs.verifyBadgeFontSize === 'number') state.verifyBadgeFontSize = prefs.verifyBadgeFontSize;
+          if (typeof prefs.verifyCardScale === 'number') state.verifyCardScale = prefs.verifyCardScale;
+          if (prefs.verifyBadgeTheme) state.verifyBadgeTheme = prefs.verifyBadgeTheme;
+        } catch (e) {
+          // Gunakan ukuran default
+        }
+      }
+
+      function applyVerificationCardLayout() {
+        dom.valQrSize.textContent = `${state.qrSize}px`;
+        dom.inpQrSize.value = String(state.qrSize);
+
+        dom.valFooterLogoSize.textContent = `${state.footerLogoSize}px`;
+        dom.inpFooterLogoSize.value = String(state.footerLogoSize);
+
+        dom.valVerifyBadgeFont.textContent = `${state.verifyBadgeFontSize}px`;
+        dom.inpVerifyBadgeFont.value = String(state.verifyBadgeFontSize);
+
+        dom.valVerifyCardScale.textContent = `${state.verifyCardScale}%`;
+        dom.inpVerifyCardScale.value = String(state.verifyCardScale);
+        dom.selVerifyBadgeTheme.value = state.verifyBadgeTheme;
+
+        // Terapkan ukuran QR Code & kotaknya
+        const qrBoxSize = state.qrSize + 10;
+        dom.certQrImg.style.width = `${state.qrSize}px`;
+        dom.certQrImg.style.height = `${state.qrSize}px`;
+        dom.certQrBox.style.width = `${qrBoxSize}px`;
+        dom.certQrBox.style.height = `${qrBoxSize}px`;
+
+        // Terapkan ukuran Logo Kartu Verifikasi
+        dom.certFooterLogoBox.style.width = `${state.footerLogoSize}px`;
+        dom.certFooterLogoBox.style.height = `${state.footerLogoSize}px`;
+
+        // Terapkan tema warna & ukuran font lencana "DOKUMEN TERARSIP & TERVERIFIKASI"
+        if (state.verifyBadgeTheme === 'hidden') {
+          dom.certVerifyBadgeRow.style.display = 'none';
+        } else {
+          dom.certVerifyBadgeRow.style.display = 'flex';
+          const theme = VERIFY_BADGE_THEMES[state.verifyBadgeTheme] || VERIFY_BADGE_THEMES.emerald;
+          dom.svgVerifyRect.setAttribute('fill', theme.fill);
+          dom.svgVerifyRect.setAttribute('stroke', theme.stroke);
+          dom.certVerifyBadge.setAttribute('fill', theme.text);
+          dom.certVerifyBadge.setAttribute('font-size', String(state.verifyBadgeFontSize));
+        }
+
+        // Sesuaikan batas lebar & skala keseluruhan kartu verifikasi
+        const extraWidth = Math.max(0, state.qrSize - 58) + Math.max(0, state.footerLogoSize - 46);
+        dom.certVerifyCard.style.maxWidth = `${585 + extraWidth}px`;
+        dom.certVerifyCard.style.transform = state.verifyCardScale === 100
+          ? 'none'
+          : `scale(${state.verifyCardScale / 100})`;
       }
 
       // =========================================================================
@@ -1964,6 +2150,10 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
           /(TIK-SV-)[A-Z]+(-)/,
           `$1${tpl.code}$2`
         );
+
+        dom.inpVerifyBadgeText.value = state.lang === 'en'
+          ? 'ARCHIVED & VERIFIED DOCUMENT'
+          : 'DOKUMEN TERARSIP & TERVERIFIKASI';
 
         if (state.inputMode === 'batch') renderBatchPreviewTable();
         updateCertificate();
@@ -2315,6 +2505,7 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
         const kaprodiTitle = dom.inpKaprodiTitle.value.trim();
         const kaprodiName = dom.inpKaprodiName.value.trim();
         const kaprodiNip = dom.inpKaprodiNip.value.trim();
+        const verifyBadgeLabel = dom.inpVerifyBadgeText.value.trim() || 'DOKUMEN TERARSIP & TERVERIFIKASI';
 
         dom.certUniv.textContent = univ;
         dom.certFaculty.textContent = faculty;
@@ -2327,6 +2518,7 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
         dom.certContextLine.textContent = contextLine;
         dom.certTopic.textContent = topic ? `“${topic}”` : '';
         dom.certArchiveId.textContent = docData.archiveId;
+        dom.certVerifyBadge.textContent = verifyBadgeLabel;
         dom.certVerifyAuthority.textContent = verifyAuthority;
         dom.certCityDate.textContent = cityDate;
         dom.certKaprodiTitle.textContent = kaprodiTitle;
@@ -2342,7 +2534,6 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
           const enDateStr = formatDateForLang(eventDate, 'en');
           dom.certEventDesc.innerHTML = `yang diselenggarakan oleh <strong style="color: #0F2942;">Program Studi Teknologi Industri Kimia, Sekolah Vokasi, Universitas Padjadjaran</strong> pada tanggal <strong style="color: #0F2942;">${escapeHtml(idDateStr)}</strong> / <span style="font-style: italic; color: #475569;">organized by Study Program of Industrial Chemical Technology, Vocational School, Universitas Padjadjaran on ${escapeHtml(enDateStr)}.</span>`;
 
-          dom.certVerifyBadge.textContent = 'DOKUMEN TERARSIP & TERVERIFIKASI';
           dom.certArchiveIdLabel.textContent = 'ID Arsip:';
           dom.certVerifyRegistryLabel.textContent = 'Database Resmi:';
           dom.certVerifyProdi.textContent = 'Prodi Teknologi Industri Kimia – SV Unpad';
@@ -2355,7 +2546,6 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
 
           dom.certEventDesc.innerHTML = `yang diselenggarakan oleh <strong style="color: #0F2942;">Program Studi Teknologi Industri Kimia, Sekolah Vokasi, Universitas Padjadjaran</strong> pada tanggal <strong style="color: #0F2942;">${escapeHtml(eventDate)}</strong>.`;
 
-          dom.certVerifyBadge.textContent = 'DOKUMEN TERARSIP & TERVERIFIKASI';
           dom.certArchiveIdLabel.textContent = 'ID Arsip:';
           dom.certVerifyRegistryLabel.textContent = 'Database Resmi:';
           dom.certVerifyProdi.textContent = 'Prodi Teknologi Industri Kimia – SV Unpad';
@@ -2368,7 +2558,6 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
 
           dom.certEventDesc.innerHTML = `organized by the <strong style="color: #0F2942;">Study Program of Industrial Chemical Technology, Vocational School, Universitas Padjadjaran</strong> on <strong style="color: #0F2942;">${escapeHtml(eventDate)}</strong>.`;
 
-          dom.certVerifyBadge.textContent = 'ARCHIVED & VERIFIED DOCUMENT';
           dom.certArchiveIdLabel.textContent = 'Archive ID:';
           dom.certVerifyRegistryLabel.textContent = 'Official Registry:';
           dom.certVerifyProdi.textContent = 'Study Program of Industrial Chemical Technology – SV Unpad';
@@ -2480,19 +2669,19 @@ Ir. Bagus Pratama, S.T., M.M.</textarea>
             clone.querySelector('#svg-num-pill'),
             clone.querySelector('#svg-num-rect'),
             clone.querySelector('#svg-num-text'),
-            14, 160, 26, 6.3, 1.05
+            18, 180, 26, 6.6, 1.08
           );
           fitSvgPill(
             clone.querySelector('#svg-role-badge'),
             clone.querySelector('#svg-role-rect'),
             clone.querySelector('#cert-role-badge'),
-            20, 140, 28, 8.4
+            22, 160, 28, 8.9, 1.12
           );
           fitSvgPill(
             clone.querySelector('#svg-verify-badge'),
             clone.querySelector('#svg-verify-rect'),
             clone.querySelector('#cert-verify-badge'),
-            16, 236, 22, 6.6
+            18, 220, Math.max(20, Math.round(state.verifyBadgeFontSize * 2.55)), state.verifyBadgeFontSize * 0.8, 1.12
           );
           await new Promise((r) => setTimeout(r, 80));
 
@@ -3955,6 +4144,55 @@ function doPost(e) {
         updateCertificate();
       });
 
+      // Event Listener Kustomisasi Ukuran QR Code & Kartu Verifikasi
+      dom.inpQrSize.addEventListener('input', (e) => {
+        state.qrSize = parseInt(e.target.value, 10) || 58;
+        applyVerificationCardLayout();
+        saveVerifyCardPrefs();
+      });
+
+      dom.inpFooterLogoSize.addEventListener('input', (e) => {
+        state.footerLogoSize = parseInt(e.target.value, 10) || 46;
+        applyVerificationCardLayout();
+        saveVerifyCardPrefs();
+      });
+
+      dom.inpVerifyBadgeFont.addEventListener('input', (e) => {
+        state.verifyBadgeFontSize = parseFloat(e.target.value) || 8.5;
+        applyVerificationCardLayout();
+        updateAllDynamicSvgBadges();
+        saveVerifyCardPrefs();
+      });
+
+      dom.inpVerifyCardScale.addEventListener('input', (e) => {
+        state.verifyCardScale = parseInt(e.target.value, 10) || 100;
+        applyVerificationCardLayout();
+        saveVerifyCardPrefs();
+      });
+
+      dom.selVerifyBadgeTheme.addEventListener('change', (e) => {
+        state.verifyBadgeTheme = e.target.value;
+        applyVerificationCardLayout();
+        updateAllDynamicSvgBadges();
+        saveVerifyCardPrefs();
+      });
+
+      dom.btnResetVerifyLayout.addEventListener('click', () => {
+        state.qrSize = 58;
+        state.footerLogoSize = 46;
+        state.verifyBadgeFontSize = 8.5;
+        state.verifyCardScale = 100;
+        state.verifyBadgeTheme = 'emerald';
+        dom.inpVerifyBadgeText.value = state.lang === 'en'
+          ? 'ARCHIVED & VERIFIED DOCUMENT'
+          : 'DOKUMEN TERARSIP & TERVERIFIKASI';
+        applyVerificationCardLayout();
+        updateCertificate();
+        saveVerifyCardPrefs();
+        showToast('Ukuran QR Code & Kartu Verifikasi dikembalikan ke default', 'info');
+      });
+
+      // Event Listener Logo Kartu Verifikasi & Mode QR Code
       dom.inpUploadFooterLogo.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -3963,6 +4201,7 @@ function doPost(e) {
           const dataUrl = ev.target.result;
           state.footerLogoType = 'img';
           state.footerLogoContent = dataUrl;
+          state.footerLogoDriveUrl = '';
           renderFooterLogo();
           saveCustomLogosToLocal();
 
@@ -3977,7 +4216,7 @@ function doPost(e) {
               saveCustomLogosToLocal();
             }
           } else {
-            showToast('Logo kartu verifikasi diperbarui', 'success');
+            showToast('Logo kartu verifikasi berhasil diperbarui', 'success');
           }
         };
         reader.readAsDataURL(file);
@@ -3987,10 +4226,9 @@ function doPost(e) {
         state.footerLogoType = 'svg';
         state.footerLogoContent = SVG_PRODI_TIK_EMBLEM;
         state.footerLogoDriveUrl = '';
-        dom.inpUploadFooterLogo.value = '';
         renderFooterLogo();
         saveCustomLogosToLocal();
-        showToast('Logo dikembalikan ke emblem Prodi TIK', 'info');
+        showToast('Logo kartu verifikasi dikembalikan ke default Prodi TIK', 'info');
       });
 
       document.querySelectorAll('input[name="qr-mode"]').forEach((radio) => {
@@ -4026,7 +4264,7 @@ function doPost(e) {
         dom.inpRoleBadge, dom.inpContextLine, dom.inpTopic, dom.inpEventDate,
         dom.inpUniv, dom.inpFaculty, dom.inpProdi, dom.inpCityDate,
         dom.inpKaprodiNip, dom.inpKaprodiTitle, dom.inpKaprodiName,
-        dom.inpArchiveId, dom.inpVerifyAuthority, dom.inpGdriveUrl
+        dom.inpArchiveId, dom.inpVerifyAuthority, dom.inpVerifyBadgeText, dom.inpGdriveUrl
       ];
       liveInputs.forEach((el) => {
         if (el) {
@@ -4104,8 +4342,10 @@ function doPost(e) {
       // =========================================================================
       function init() {
         loadCustomLogosFromLocal();
+        loadVerifyCardPrefs();
         renderHeaderLogos();
         renderFooterLogo();
+        applyVerificationCardLayout();
         loadGasSettings();
         loadArchives();
         updateCertificate();
